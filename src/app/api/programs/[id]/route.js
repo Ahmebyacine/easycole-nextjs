@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import Program from "@/models/Program";
+import Course from "@/models/Course";
+import Institution from "@/models/Institution";
+import Trainer from "@/models/Trainer";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/mongodb";
@@ -11,14 +14,16 @@ export async function GET(req, context) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    return new Response(
-      JSON.stringify({ message: "Unauthorized" }),
-      { status: 401 }
-    );
+    return new Response(JSON.stringify({ message: "Unauthorized" }), {
+      status: 401,
+    });
   }
 
-  const program = await Program.findById(id).populate("course institution trainer");
-  if (!program) return NextResponse.json({ error: "Program not found" }, { status: 404 });
+  const program = await Program.findById(id).populate(
+    "course institution trainer"
+  );
+  if (!program)
+    return NextResponse.json({ error: "Program not found" }, { status: 404 });
 
   return NextResponse.json(program);
 }
@@ -30,10 +35,9 @@ export async function PUT(req, context) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    return new Response(
-      JSON.stringify({ message: "Unauthorized" }),
-      { status: 401 }
-    );
+    return new Response(JSON.stringify({ message: "Unauthorized" }), {
+      status: 401,
+    });
   }
 
   const updates = await req.json();
@@ -43,7 +47,8 @@ export async function PUT(req, context) {
     runValidators: true,
   }).populate("course institution trainer");
 
-  if (!updated) return NextResponse.json({ error: "Program not found" }, { status: 404 });
+  if (!updated)
+    return NextResponse.json({ error: "Program not found" }, { status: 404 });
 
   return NextResponse.json(updated);
 }
@@ -55,14 +60,18 @@ export async function DELETE(req, context) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
-    return new Response(
-      JSON.stringify({ message: "Unauthorized" }),
-      { status: 401 }
-    );
+    return new Response(JSON.stringify({ message: "Unauthorized" }), {
+      status: 401,
+    });
   }
 
-  const deleted = await Program.findByIdAndUpdate(id, { isDeleted: true }, { new: true });
-  if (!deleted) return NextResponse.json({ error: "Program not found" }, { status: 404 });
+  const deleted = await Program.findByIdAndUpdate(
+    id,
+    { isDeleted: true },
+    { new: true }
+  );
+  if (!deleted)
+    return NextResponse.json({ error: "Program not found" }, { status: 404 });
 
   return NextResponse.json({ message: "Program deleted", deleted });
 }
