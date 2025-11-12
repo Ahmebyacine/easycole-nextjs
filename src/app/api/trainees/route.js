@@ -3,6 +3,7 @@ import Trainee from "@/models/Trainee";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/mongodb";
+import "@/lib/models";
 
 // @desc Create new trainee
 export async function POST(req) {

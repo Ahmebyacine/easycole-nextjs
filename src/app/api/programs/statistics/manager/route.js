@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/mongodb";
 import Trainee from "@/models/Trainee";
+import "@/lib/models";
 
 export async function GET() {
   await connectDB();

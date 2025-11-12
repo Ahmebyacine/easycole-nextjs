@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Trainee from "@/models/Trainee";
+import "@/lib/models";
 
 export async function POST(req) {
   await connectDB();

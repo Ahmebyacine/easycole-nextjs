@@ -3,6 +3,7 @@ import Expense from "@/models/Expense";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import "@/lib/models";
 
 const populateOptions = [
   { path: "employee", select: "name email" },

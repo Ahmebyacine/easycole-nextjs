@@ -3,6 +3,7 @@ import Lead from "@/models/Lead";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import "@/lib/models";
 
 // @desc get all leads
 export async function GET() {

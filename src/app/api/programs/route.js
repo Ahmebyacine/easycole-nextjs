@@ -3,6 +3,7 @@ import Program from "@/models/Program";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/mongodb";
+import "@/lib/models";
 
 //@desc Get all programs
 export async function GET() {

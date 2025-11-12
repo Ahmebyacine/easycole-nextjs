@@ -3,6 +3,7 @@ import User from "@/models/User";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import "@/lib/models";
 
 // @desc GET /api/institutions/user → manager institutions
 export async function GET() {

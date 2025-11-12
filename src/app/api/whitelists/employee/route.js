@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Whitelist from "@/models/Whitelist";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import "@/lib/models";
 
 export async function GET() {
   await connectDB();

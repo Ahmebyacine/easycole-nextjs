@@ -4,6 +4,7 @@ import User from "@/models/User";
 import { connectDB } from "@/lib/mongodb";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import "@/lib/models";
 
 // @desc Get all users (except admins)
 export async function GET() {

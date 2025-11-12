@@ -4,6 +4,7 @@ import Program from "@/models/Program";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import "@/lib/models";
 
 // @desc get leads for user's institutions' future programs
 export async function GET() {

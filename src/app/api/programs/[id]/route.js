@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
 import Program from "@/models/Program";
-import Course from "@/models/Course";
-import Institution from "@/models/Institution";
-import Trainer from "@/models/Trainer";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/mongodb";
+import "@/lib/models";
 
 //@desc Get a program by ID
 export async function GET(req, context) {

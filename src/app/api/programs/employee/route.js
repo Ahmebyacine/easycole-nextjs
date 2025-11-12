@@ -4,6 +4,7 @@ import User from "@/models/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/mongodb";
+import "@/lib/models";
 
 //@desc get all active programs for employee
 export async function GET() {

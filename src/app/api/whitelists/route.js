@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/mongodb";
 import Whitelist from "@/models/Whitelist";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import "@/lib/models";
 
 // @desc Create a new whitelist
 // @route POST /api/whitelists
