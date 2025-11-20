@@ -63,7 +63,7 @@ export default function SignIn() {
         admin: "/admin/dashboard",
         manager: "/manager/programs",
         member: "/certificat-conformite",
-        employee: "/add-trainee",
+        employee: "/employee/add-trainee",
       };
 
       const path = rolePaths[session.user.role] || "/";

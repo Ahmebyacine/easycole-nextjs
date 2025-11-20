@@ -57,8 +57,6 @@ export default function ProgramReportPage() {
     fetchReportData();
   }, [id]);
 
-  const calcPercent = (paid, total) => (!total ? 0 : (paid / total) * 100);
-
   if (isLoading) {
     return (
       <div className="container mx-auto py-10 text-center" dir="rtl">

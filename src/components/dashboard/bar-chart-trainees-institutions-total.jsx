@@ -3,11 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer } from "@/components/ui/chart";
 import { ChartBar, TriangleAlert } from "lucide-react";
 import useFetch from "@/hooks/use-fetch";
 
@@ -16,11 +12,10 @@ export default function BarChartTraineesInstitutionsTotal() {
     "/api/trainees/stats/institutions-total"
   );
   const chartConfig = {
-  totalPrice: {
-    label: "إجمالي المدفوعات",
-    color: "var(--chart-1)",
-  },
-};
+    totalPrice: {
+      label: "إجمالي المدفوعات",
+    },
+  };
 
   console.log(data);
   return (
@@ -74,13 +69,14 @@ export default function BarChartTraineesInstitutionsTotal() {
         </CardContent>
       ) : (
         <CardContent className="px-0 overflow-x-auto">
-          <ChartContainer config={chartConfig} className="h-full w-full min-w-[500px]">
+          <ChartContainer config={chartConfig} className="h-full w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={data}>
                 <XAxis dataKey="institution" />
                 <YAxis />
                 <Bar
                   dataKey="totalPrice"
+                  fill="var(--chart-2)"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>

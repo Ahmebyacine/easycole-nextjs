@@ -6,8 +6,9 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import "@/lib/models";
 
 // @desc Get single whitelist by ID
-export async function GET(req, { params }) {
+export async function GET(req, context) {
   await connectDB();
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -16,7 +17,7 @@ export async function GET(req, { params }) {
     });
   }
 
-  const whitelist = await Whitelist.findById(params.id)
+  const whitelist = await Whitelist.findById(id)
     .sort({ createdAt: -1 })
     .populate("employee")
     .populate({
@@ -38,8 +39,9 @@ export async function GET(req, { params }) {
 }
 
 // @desc Update whitelist
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
   await connectDB();
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -51,7 +53,7 @@ export async function PUT(req, { params }) {
   const { name, phone, program, status, note } = await req.json();
 
   const whitelist = await Whitelist.findByIdAndUpdate(
-    params.id,
+    id,
     { name, phone, program, status, note },
     { new: true, runValidators: true }
   );
@@ -73,8 +75,9 @@ export async function PUT(req, { params }) {
 }
 
 // @desc Delete whitelist
-export async function DELETE(req, { params }) {
+export async function DELETE(req, context) {
   await connectDB();
+  const { id } = await context.params; 
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -83,14 +86,12 @@ export async function DELETE(req, { params }) {
     });
   }
 
-  const whitelist = await Whitelist.findByIdAndDelete(params.id);
+  const whitelist = await Whitelist.findByIdAndDelete(id);
   if (!whitelist) {
     return new Response(JSON.stringify({ message: "Whitelist not found" }), {
       status: 404,
     });
   }
 
-  return new Response(JSON.stringify({ message: "Whitelist removed" }), {
-    status: 204,
-  });
+  return new Response(JSON.stringify({ message: "Whitelist removed" }));
 }

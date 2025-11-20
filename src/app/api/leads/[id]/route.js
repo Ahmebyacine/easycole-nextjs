@@ -6,16 +6,19 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import "@/lib/models";
 
 // @desc get a single lead
-export async function GET(req, { params }) {
+export async function GET(req, context) {
   await connectDB();
-  const lead = await Lead.findById(params.id).populate("course");
-  if (!lead) return NextResponse.json({ message: "Lead not found" }, { status: 404 });
+  const { id } = await context.params;
+  const lead = await Lead.findById(id).populate("course");
+  if (!lead)
+    return NextResponse.json({ message: "Lead not found" }, { status: 404 });
   return NextResponse.json(lead);
 }
 
 // @desc update a lead
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
   await connectDB();
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session)
@@ -23,7 +26,7 @@ export async function PUT(req, { params }) {
 
   const { name, phone, wilaya, course, status } = await req.json();
   const lead = await Lead.findByIdAndUpdate(
-    params.id,
+    id,
     { name, phone, wilaya, course, status },
     { new: true, runValidators: true }
   ).populate("course");
@@ -35,16 +38,17 @@ export async function PUT(req, { params }) {
 }
 
 // @desc delete a lead (admin only)
-export async function DELETE(req, { params }) {
+export async function DELETE(req, context) {
   await connectDB();
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "admin")
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
 
-  const lead = await Lead.findByIdAndDelete(params.id);
+  const lead = await Lead.findByIdAndDelete(id);
   if (!lead)
     return NextResponse.json({ message: "Lead not found" }, { status: 404 });
 
-  return NextResponse.json({ message: "Lead removed" }, { status: 204 });
+  return NextResponse.json({ message: "Lead removed" });
 }

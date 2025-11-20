@@ -8,7 +8,6 @@ import {
   Users,
   Contact,
   ChartBarStacked,
-  CoinsIcon,
   BookCheck,
   GraduationCap,
   FileClock,
@@ -19,6 +18,7 @@ import {
   LogOut,
   Loader,
   EllipsisVertical,
+  LoaderIcon,
 } from "lucide-react";
 import {
   Sidebar,
@@ -73,12 +73,16 @@ const navItemsByRole = {
     },
   ],
   employee: [
-    { title: "إضافة متدرب", url: "/add-trainee", icon: Users },
-    { title: "بحث عن المتدرب", url: "/search-trainee", icon: Search },
-    { title: "قيد التسجيل", url: "/whitelist", icon: LayoutDashboard },
-    { title: "متدربون محتملون", url: "/leads", icon: Contact },
-    { title: "المصاريف", url: "/expenses", icon: CoinsIcon },
-    { title: "إحصائيات", url: "/user-statistics", icon: ChartBarStacked },
+    { title: "إضافة متدرب", url: "/employee/add-trainee", icon: Users },
+    { title: "بحث عن المتدرب", url: "/employee/search", icon: Search },
+    { title: "قيد التسجيل", url: "/employee/whitelist", icon: LoaderIcon },
+    { title: "متدربون محتملون", url: "/employee/lead", icon: Contact },
+    {
+    title: "إحصائيات البرامج",
+    url: "/employee/statistics/programs",
+    icon: Calendar,
+  },
+    { title: "إحصائيات", url: "/employee/statistics", icon: ChartBarStacked },
   ],
   member: [
     { title: "شهادة مطابقة", url: "/certificat-conformite", icon: BookCheck },

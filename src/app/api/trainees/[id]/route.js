@@ -6,8 +6,9 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import "@/lib/models";
 
 // @desc Get single trainee
-export async function GET(_, { params }) {
+export async function GET(_, context) {
   await connectDB();
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -15,7 +16,6 @@ export async function GET(_, { params }) {
       status: 401,
     });
   }
-  const { id } = params;
 
   const trainee = await Trainee.findById(id)
     .populate("employee")
@@ -36,8 +36,9 @@ export async function GET(_, { params }) {
 }
 
 // @desc Update trainee
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
   await connectDB();
+  const {id } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -45,7 +46,6 @@ export async function PUT(req, { params }) {
       status: 401,
     });
   }
-  const { id } = params;
   const updates = await req.json();
 
   const trainee = await Trainee.findByIdAndUpdate(id, updates, {
@@ -69,8 +69,9 @@ export async function PUT(req, { params }) {
 }
 
 // @desc Delete trainee
-export async function DELETE(_, { params }) {
+export async function DELETE(_, context) {
   await connectDB();
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -79,13 +80,11 @@ export async function DELETE(_, { params }) {
     });
   }
 
-  const { id } = params;
-
   const trainee = await Trainee.findByIdAndDelete(id);
   if (!trainee)
     return new Response(JSON.stringify({ message: "Trainee not found" }), {
       status: 404,
     });
 
-  return NextResponse.json({ message: "Trainee removed" }, { status: 204 });
+  return NextResponse.json({ message: "Trainee removed" });
 }

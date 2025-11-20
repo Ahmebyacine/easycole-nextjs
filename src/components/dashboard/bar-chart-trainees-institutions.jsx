@@ -10,7 +10,6 @@ export default function BarChartTraineesInstitutions() {
   const chartConfig = {
     count: {
       label: "إجمالي المتدربين",
-      color: "var(--chart-2)",
     },
   };
   return (
@@ -65,7 +64,7 @@ export default function BarChartTraineesInstitutions() {
       ) : (
         <>
           <CardContent className="px-0 overflow-x-auto">
-            <ChartContainer config={chartConfig} className="h-full w-full min-w-[500px]">
+            <ChartContainer config={chartConfig} className="h-full w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data}>
                   <XAxis dataKey="institution" />

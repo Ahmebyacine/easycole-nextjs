@@ -19,7 +19,7 @@ import { calculateDuration, formatDate } from "@/utils/formatSafeDate";
 import { formatCurrencyDZD } from "@/utils/formatCurrency";
 import Link from "next/link";
 
-export default function ProgramStatisticsCard({ data }) {
+export default function ProgramStatisticsCard({ data, isEmployee = false }) {
   const startDate = new Date(data.program.startDate);
   const endDate = new Date(data.program.endDate);
 
@@ -42,7 +42,7 @@ export default function ProgramStatisticsCard({ data }) {
 
         <Button variant="outline" className="w-full">
           <Link
-            href={`/program-report/${data.program.id}`}
+            href={ isEmployee ? `/employee/program-report/${data.program.id}` : `/program-report/${data.program.id}`}
             onClick={(e) => {
               e.preventDefault();
               window.open(e.currentTarget.href, "_blank");

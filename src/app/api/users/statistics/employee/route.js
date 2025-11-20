@@ -13,12 +13,6 @@ export async function GET() {
   if (!session) {
     return new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 });
   }
-  
-
-  // Validate user ID format
-  if (!mongoose.Types.ObjectId.isValid(session.user.id)) {
-    return new Response(JSON.stringify({ message: 'Invalid user ID format' }), { status: 400 });
-  }
 
   // Check if user exists
   const user = await User.findById(session.user.id);
