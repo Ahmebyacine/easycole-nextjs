@@ -1,6 +1,6 @@
-import { generateCertificateDAptitudePDF } from "@/lib/pdf/certificAteaptitude";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import { generateCertificateDAptitudePDF } from "@/lib/pdf/certificateAptitude";
 
 export async function POST(req) {
   const session = await getServerSession(authOptions);
@@ -15,7 +15,7 @@ export async function POST(req) {
   return new Response(pdfBuffer, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": 'attachment; filename="attestation-formation.pdf"',
+      "Content-Disposition": 'attachment; filename="certificate-aptitude.pdf"',
     },
   });
 }
