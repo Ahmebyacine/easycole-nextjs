@@ -85,16 +85,16 @@ const navItemsByRole = {
     { title: "إحصائيات", url: "/employee/statistics", icon: ChartBarStacked },
   ],
   member: [
-    { title: "شهادة مطابقة", url: "/certificat-conformite", icon: BookCheck },
+    //{ title: "شهادة مطابقة", url: "/certificat-conformite", icon: BookCheck },
     {
       title: "شهادة التدريب",
-      url: "/attestation-de-formation",
+      url: "/member/certificats/formation",
       icon: GraduationCap,
     },
-    { title: "شهادة الكفاءة", url: "/certificate-d-aptitude", icon: FileClock },
+    { title: "شهادة الكفاءة", url: "/member/certificats/aptitude", icon: FileClock },
     {
       title: "شهادة التدريب (سنة واحدة)",
-      url: "/attestation-de-formationDuree",
+      url: "/member/certificats/formation-duree",
       icon: FileCheck,
     },
   ],
