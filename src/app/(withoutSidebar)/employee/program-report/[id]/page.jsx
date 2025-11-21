@@ -63,10 +63,20 @@ export default function ProgramReportEmployeePage() {
 
   const confirmPayment = async (traineeId) => {
     try {
-      const updated = await fetchJSON(
-        `/api/trainee/confirm-second-tranche/${traineeId}`,
-        { method: "PATCH" }
+      const res = await fetch(
+        `/api/trainees/confirm-second-tranche/${traineeId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+        }
       );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.message || "Request failed");
+      }
+
+      const updated = await res.json();
 
       const updatedTrainee = {
         id: updated._id,
@@ -89,22 +99,20 @@ export default function ProgramReportEmployeePage() {
       setReportData((prevData) => {
         if (!prevData) return prevData;
 
-        const newEmployees = prevData.employees.map((emp) => {
-          return {
-            ...emp,
-            trainees: emp.trainees.map((t) =>
-              t.id === updatedTrainee.id ? updatedTrainee : t
-            ),
-          };
-        });
+        const newEmployees = prevData.employees.map((emp) => ({
+          ...emp,
+          trainees: emp.trainees.map((t) =>
+            t.id === updatedTrainee.id ? updatedTrainee : t
+          ),
+        }));
 
         return { ...prevData, employees: newEmployees };
       });
 
-      toast.success("تم تحديث بنجاح");
+      toast.success("تم التحديث بنجاح");
     } catch (err) {
-      toast.error("حدث خطأ أثناء التحديث");
       console.error(err);
+      toast.error("حدث خطأ أثناء التحديث");
     }
   };
 
