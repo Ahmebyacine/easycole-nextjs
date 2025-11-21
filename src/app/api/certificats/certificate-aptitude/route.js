@@ -1,4 +1,4 @@
-import { generateCertificateDAptitudePDF } from "@/lib/pdf/certificateaptitude";
+import { generateCertificateDAptitudePDF } from "@/lib/pdf/certificAteaptitude";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
