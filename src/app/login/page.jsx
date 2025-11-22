@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -39,6 +39,28 @@ export default function SignIn() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const session = await getSession();
+
+      if (session?.user?.role) {
+        const rolePaths = {
+          admin: "/admin/dashboard",
+          manager: "/manager/programs",
+          member: "/member/certificats/formation",
+          employee: "/employee/add-trainee",
+        };
+
+        const path = rolePaths[session.user.role] || "/";
+        router.push(path);
+      }
+      setCheckingSession(false);
+    };
+
+    checkSession();
+  }, [router]);
 
   const form = useForm({
     resolver: zodResolver(signInSchema),
@@ -72,6 +94,14 @@ export default function SignIn() {
 
     setIsLoading(false);
   };
+
+  if (checkingSession) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin" />
+    </div>
+  );
+}
 
   return (
     <div
