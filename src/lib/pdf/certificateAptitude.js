@@ -31,7 +31,7 @@ export async function generateCertificateDAptitudePDF(values) {
         "Tahoma.ttf"
       );
 
-      doc.registerFont("Calibri", calibriFont);
+      doc.registerFont("Calibri", calibriFont); 
       doc.registerFont("Tahoma", tahomaFont);
 
       // Background image
