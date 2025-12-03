@@ -4,6 +4,8 @@ import path from "path";
 import { formatFrenchDate, addOneYear } from "@/utils/formatSafeDate";
 
 export async function generateCertificateDAptitudePDF(values) {
+  const date = new Date(values.trainingDate);
+  date.setHours(date.getHours() + 1);
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
@@ -109,7 +111,7 @@ export async function generateCertificateDAptitudePDF(values) {
 Vu le décret n°01-419 du 5 chaoual 1422 correspondant au 20 décembre 2001 fixant les conditions de création d'ouverture, de contrôle des établissement privés de la formation professionnelle.
 Vu la décision d’agrément n°1904 du 18 AOUT 2018.
 Vu le procès-verbal des délibérations en date du : ${formatFrenchDate(
-            values.trainingDate
+            date
           )}.
 Il est attribué à Mr/Ms : `,
           60,
@@ -155,7 +157,7 @@ Il est attribué à Mr/Ms : `,
             { continued: true }
           );
 
-        doc.fillColor("#1E4F79").text(formatFrenchDate(values.trainingDate), {
+        doc.fillColor("#1E4F79").text(formatFrenchDate(date), {
           continued: true,
         });
 
@@ -163,7 +165,7 @@ Il est attribué à Mr/Ms : `,
 
         doc
           .fillColor("#1E4F79")
-          .text(formatFrenchDate(addOneYear(values.trainingDate)), {
+          .text(formatFrenchDate(addOneYear(date)), {
             lineGap: 4,
           });
 

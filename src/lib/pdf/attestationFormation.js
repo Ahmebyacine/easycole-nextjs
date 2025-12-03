@@ -4,6 +4,8 @@ import fs from "fs";
 import path from "path";
 
 export async function generateAttestationFormationPDF(values) {
+  const date = new Date(values.trainingDate);
+  date.setHours(date.getHours() + 1);
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
@@ -60,16 +62,11 @@ export async function generateAttestationFormationPDF(values) {
         doc
           .font("Calibri")
           .fontSize(18)
-          .text(
-            "ETABLISSEMENT PRIVE DE FORMATION PROFESSIONNELLE",
-            40,
-            60,
-            {
-              align: "center",
-              width: doc.page.width - 94,
-              lineGap: 8,
-            }
-          );
+          .text("ETABLISSEMENT PRIVE DE FORMATION PROFESSIONNELLE", 40, 60, {
+            align: "center",
+            width: doc.page.width - 94,
+            lineGap: 8,
+          });
 
         doc.fontSize(14).text("Agrée par", {
           align: "center",
@@ -122,9 +119,7 @@ export async function generateAttestationFormationPDF(values) {
         const bodyText = `La Direction de l'Etablissement Privé de la Formation Professionnelle WADFOR :
 Vu le décret n°01-419 du 5 chaoual 1422 correspondant au 20 décembre 2001 fixan les conditions de création d'ouverture, de contrôle des établissement privés de la formation professionnelle.
 Vu la décision d'agrément n° 1904 du 18 AOUT 2018.
-Vu le procès-verbal des délibérations en date du : ${formatFrenchDate(
-          values?.trainingDate
-        )}.
+Vu le procès-verbal des délibérations en date du : ${formatFrenchDate(date)}.
 Il est attribué à Mr/Ms : `;
 
         doc.text(bodyText, 60, doc.y, {
@@ -141,7 +136,9 @@ Il est attribué à Mr/Ms : `;
 
         doc.fillColor("#1E4F79").text(trainee?.birthDate, { continued: true });
 
-        doc.fillColor("#000000").text("               à : ", { continued: true });
+        doc
+          .fillColor("#000000")
+          .text("               à : ", { continued: true });
 
         doc.fillColor("#1E4F79").text(trainee?.birthPlace, { continued: true });
 
@@ -149,12 +146,10 @@ Il est attribué à Mr/Ms : `;
           .fillColor("#000000")
           .text("               wilaya : ", { continued: true });
 
-        doc
-          .fillColor("#1E4F79")
-          .text(trainee?.wilaya, {
-            continued: false,
-            lineGap: 8,
-          });
+        doc.fillColor("#1E4F79").text(trainee?.wilaya, {
+          continued: false,
+          lineGap: 8,
+        });
 
         // Specialty
         doc
@@ -180,7 +175,7 @@ Il est attribué à Mr/Ms : `;
           });
 
         doc.text(
-          `Le : ${formatFrenchDate(values?.trainingDate)}`,
+          `Le : ${formatFrenchDate(date)}`,
           doc.page.width / 2,
           footerY,
           {

@@ -1,6 +1,7 @@
 import { Toaster } from "sonner";
 import "./globals.css";
 import { Cairo } from "next/font/google";
+import GlobalProgress from "./global-progress";
 
 const cairoSans = Cairo({
   variable: "--font-cairo-sans",
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ar" dir="rtl">
       <body className={`${cairoSans.className} antialiased`}>
+        <GlobalProgress />
         {children}
         <Toaster />
       </body>
