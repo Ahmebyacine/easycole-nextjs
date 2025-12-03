@@ -1,15 +1,21 @@
 "use client";
 
 import NProgress from "nprogress";
-import { useEffect } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import "nprogress/nprogress.css";
 
 export default function GlobalProgress() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const firstLoad = useRef(true);
 
   useEffect(() => {
+    // Ignore first load
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+
     NProgress.start();
 
     const timer = setTimeout(() => {
@@ -17,7 +23,7 @@ export default function GlobalProgress() {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return null;
 }
