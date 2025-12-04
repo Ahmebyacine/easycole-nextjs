@@ -181,7 +181,7 @@ Il est attribué à Mr/Ms : `,
         doc.fontSize(12).text("Le Directeur :", 100, footerY);
 
         doc.text(
-          `Le : ${formatFrenchDate(values?.trainingDate)}`,
+          `Le : ${formatFrenchDate(date)}`,
           doc.page.width / 2,
           footerY,
           {
