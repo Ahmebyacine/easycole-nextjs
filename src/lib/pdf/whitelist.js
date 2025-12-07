@@ -1,12 +1,12 @@
 import PDFDocument from "pdfkit";
 import path from "path";
-import { formatDate } from "@/utils/formatSafeDate";
+import { formatFrenchDate } from "@/utils/formatSafeDate";
 
 const fontsPath = path.join(process.cwd(), "src/assets/fonts");
 
 export async function generateWhitelistPDF(whitelists) {
   const doc = new PDFDocument({
-    margin: 30,
+    margin: 20,
     size: "A4",
     layout: "portrait",
   });
@@ -27,8 +27,6 @@ export async function generateWhitelistPDF(whitelists) {
     .font("CairoBold")
     .fontSize(20)
     .text("قائمة قيد التسجيل", { align: "center", features: ["rtla"] });
-
-  doc.moveDown();
 
   const program = whitelists[0].program;
 
@@ -65,20 +63,14 @@ export async function generateWhitelistPDF(whitelists) {
       .fontSize(16)
       .text(`الموظف: ${empName}`, { align: "right", features: ["rtla"] });
 
-    doc
-      .moveTo(40, doc.y + 2)
-      .lineTo(550, doc.y + 2)
-      .strokeColor("#666")
-      .stroke();
-
     doc.strokeColor("#000");
-    doc.moveDown(0.4);
+    doc.moveDown(0.2);
 
     // ---------------- TABLE CONFIG ----------------
     const tableHeaders = ["التاريخ", "الملاحظة", "الحالة", "الهاتف", "الاسم"];
 
-    const colWidths = [120, 100, 70, 140, 90]; // مجموعها = 520 تقريبًا
-    const startX = 20;
+    const colWidths = [100, 140, 60, 120, 120];
+    const startX = 25;
 
     // ---------------- DRAW TABLE HEADER ----------------
     const drawTableHeader = () => {
@@ -87,9 +79,9 @@ export async function generateWhitelistPDF(whitelists) {
       const y = doc.y;
 
       tableHeaders.forEach((header, i) => {
-        doc.text(header, x, y, {
+        doc.text(header, x - 5, y, {
           width: colWidths[i],
-          align: "center",
+          align: "right",
           features: ["rtla"],
         });
         x += colWidths[i];
@@ -97,8 +89,8 @@ export async function generateWhitelistPDF(whitelists) {
 
       // خط تحت العنوان
       doc
-        .moveTo(startX, y + 20)
-        .lineTo(startX + colWidths.reduce((a, b) => a + b), y + 20)
+        .moveTo(startX, y + 22)
+        .lineTo(startX + colWidths.reduce((a, b) => a + b), y + 22)
         .stroke();
     };
 
@@ -108,7 +100,7 @@ export async function generateWhitelistPDF(whitelists) {
 
       const xStart = startX;
       const rowData = [
-        formatDate(entry.createdAt),
+        formatFrenchDate(entry.createdAt),
         entry.note || "-",
         entry.status === "new" ? "جديد" : "ملغي",
         entry.phone,
@@ -119,22 +111,21 @@ export async function generateWhitelistPDF(whitelists) {
       const cellHeights = rowData.map((cell, i) => {
         return doc.heightOfString(cell, {
           width: colWidths[i],
-          align: "center",
+          align: "right",
           features: ["rtla"],
         });
       });
-
       // 2️⃣ استخدم أكبر ارتفاع كارتفاع الصف
-      const rowHeight = Math.max(...cellHeights, 20); // 20 كحد أدنى
+      const rowHeight = Math.max(...cellHeights, 25); // 20 كحد أدنى
 
       // 3️⃣ ارسم كل خلية
       let x = xStart;
       const y = doc.y;
 
       rowData.forEach((cell, i) => {
-        doc.text(cell, x, y, {
+        doc.text(cell, x - 5, y, {
           width: colWidths[i],
-          align: "center",
+          align: "right",
           features: ["rtla"],
         });
 
@@ -162,15 +153,18 @@ export async function generateWhitelistPDF(whitelists) {
         .stroke();
 
       // 4️⃣ انتقل للسطر التالي
-      doc.y += rowHeight;
+      if (rowHeight > 25) doc.y += rowHeight / 2;
     };
 
     // ---------------- USE THE TABLE ----------------
     drawTableHeader();
-
     grouped[empName].forEach((entry) => {
       drawRow(entry);
+      if (doc.y > 800) {
+        doc.addPage();
+      }
     });
+    doc.moveDown(1);
   }
 
   doc.end();

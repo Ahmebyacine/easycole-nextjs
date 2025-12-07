@@ -12,6 +12,10 @@ export async function proxy(req) {
     employee: "/employee/add-trainee",
   };
 
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
   // Redirect logged-in users away from /login
   if (pathname === "/login" && token) {
     return NextResponse.redirect(new URL(rolePaths[token.role] || "/", req.url));
@@ -51,6 +55,7 @@ export async function proxy(req) {
 
 export const config = {
   matcher: [
+    "/",
     "/login",
     "/admin/:path*",
     "/manager/:path*",
