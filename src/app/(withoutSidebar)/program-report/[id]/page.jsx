@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -21,6 +22,8 @@ import {
 import { Calendar, Users, AlertCircle } from "lucide-react";
 import { formatDate } from "@/utils/formatSafeDate";
 import { formatCurrencyDZD } from "@/utils/formatCurrency";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function ProgramReportPage() {
   const params = useParams();
@@ -29,6 +32,7 @@ export default function ProgramReportPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeEmployee, setActiveEmployee] = useState("");
   const [error, setError] = useState(null);
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -57,6 +61,32 @@ export default function ProgramReportPage() {
     fetchReportData();
   }, [id]);
 
+  const handleDownloadPDF = async () => {
+    setIsDownloadingPDF(true);
+    try {
+      const res = await fetch(`/api/programs/${id}/report/pdf`);
+
+      if (!res.ok) {
+        toast.error("فشل تحميل الملف");
+        throw new Error("Failed to download");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `program-report-${id}.pdf`;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error("حدث خطأ أثناء تحميل الملف");
+    } finally {
+      setIsDownloadingPDF(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-10 text-center" dir="rtl">
@@ -82,6 +112,11 @@ export default function ProgramReportPage() {
               {program?.institution}
             </CardDescription>
           </div>
+          <CardAction>
+            <Button onClick={handleDownloadPDF} disabled={isDownloadingPDF}>
+              {isDownloadingPDF ? "جاري التحميل..." : "تنزيل التقرير PDF"}
+            </Button>
+          </CardAction>
         </CardHeader>
 
         <CardContent className="pt-6">
@@ -191,7 +226,7 @@ export default function ProgramReportPage() {
                           <TableCell className="font-medium">
                             {t.name}
                           </TableCell>
-                          <TableCell className="text-left" >{t.email}</TableCell>
+                          <TableCell className="text-left">{t.email}</TableCell>
                           <TableCell className="text-right" dir="ltr">
                             {t.phone}
                           </TableCell>

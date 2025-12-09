@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -33,6 +34,7 @@ export default function ProgramReportEmployeePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeEmployee, setActiveEmployee] = useState("");
   const [error, setError] = useState(null);
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -116,6 +118,32 @@ export default function ProgramReportEmployeePage() {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    setIsDownloadingPDF(true);
+    try {
+      const res = await fetch(`/api/programs/${id}/report/pdf`);
+
+      if (!res.ok) {
+        toast.error("فشل تحميل الملف");
+        throw new Error("Failed to download");
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `program-report-${id}.pdf`;
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error("حدث خطأ أثناء تحميل الملف");
+    } finally {
+      setIsDownloadingPDF(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto py-10">
@@ -139,6 +167,11 @@ export default function ProgramReportEmployeePage() {
           <CardDescription className="text-lg">
             {program?.institution}
           </CardDescription>
+          <CardAction>
+            <Button onClick={handleDownloadPDF} disabled={isDownloadingPDF}>
+              {isDownloadingPDF ? "جاري التحميل..." : "تنزيل التقرير PDF"}
+            </Button>
+          </CardAction>
         </CardHeader>
 
         <CardContent className="pt-6">

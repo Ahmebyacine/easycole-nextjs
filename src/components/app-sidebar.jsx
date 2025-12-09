@@ -85,7 +85,7 @@ const navItemsByRole = {
     { title: "إحصائيات", url: "/employee/statistics", icon: ChartBarStacked },
   ],
   member: [
-    //{ title: "شهادة مطابقة", url: "/certificat-conformite", icon: BookCheck },
+    //{ title: "شهادة مطابقة", url: "/member/certificats/conformite", icon: BookCheck },
     {
       title: "شهادة التدريب",
       url: "/member/certificats/formation",
