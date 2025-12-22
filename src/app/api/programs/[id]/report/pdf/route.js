@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB } from "@/lib/mongodb";
 import { generateProgramReportPDF } from "@/lib/pdf/programReport";
@@ -5,7 +6,6 @@ import Program from "@/models/Program";
 import Trainee from "@/models/Trainee";
 import { getServerSession } from "next-auth";
 import "@/lib/models";
-import { NextResponse } from "next/server";
 
 export async function GET(req, context) {
   await connectDB();

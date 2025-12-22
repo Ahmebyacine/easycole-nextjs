@@ -1,30 +1,12 @@
-import PDFDocument from "pdfkit";
+import PDFDocument, { fontSize } from "pdfkit";
 import path from "path";
 import { fileURLToPath } from "url";
-import { formatDate, formatFrenchDate } from "@/utils/formatSafeDate";
-
-/**
- * generateCertificatConformitePDF(data)
- * - data: object containing fields used in the certificate and report.
- *   Expected shape (example):
- *   {
- *     reportRef: "REF-001",
- *     dateOfInspection: "2025-11-21",
- *     description: "Excavator Model X",
- *     customer: "ACME Corp",
- *     manufacturer: "ACME Industries",
- *     model: "X-1000",
- *     workingLoadLimit: "2000 kg",
- *     yearOfManufacture: "2020",
- *     serialNumber: "SN-123456",
- *     equipmentImage: "data:image/png;base64,...", // optional data URL
- *     manager: "Inspector Name",
- *     notes: "...",
- *     checks: [ "Check 1", "Check 2", ... ] // optional array for table rows
- *   }
- *
- * Returns a Buffer containing the PDF
- */
+import {
+  addOneYear,
+  formatDate,
+  formatFrenchDate,
+  formatShortFrenchDate,
+} from "@/utils/formatSafeDate";
 
 const fontsPath = path.join(process.cwd(), "src", "assets", "fonts");
 
@@ -33,7 +15,7 @@ export async function generateCertificatConformitePDF(values = {}) {
     try {
       const doc = new PDFDocument({
         size: "A4",
-        margin: 28,
+        margin: 10,
         autoFirstPage: false,
       });
 
@@ -63,90 +45,52 @@ export async function generateCertificatConformitePDF(values = {}) {
         doc.fontSize(size);
       };
 
-      const drawHr = (yOffset = 6) => {
-        const x = doc.x;
-        doc
-          .moveTo(doc.page.margins.left, doc.y + yOffset)
-          .lineTo(doc.page.width - doc.page.margins.right, doc.y + yOffset)
-          .stroke();
-        doc.moveDown(0.4);
-      };
-
       // INFO ROW helper (label right, value left)
       const infoRow = (label, value, opts = {}) => {
         const labelW = pageWidth * 0.4;
-        const valueW = pageWidth - labelW;
-        font("bold", opts.labelSize || 10);
-        doc.text(`• ${label}`, doc.page.width / 6, doc.y, {
+        const labelX = doc.page.width / 5;
+        const valueX = opts.valueX || 350;
+        const startY = doc.y;
+
+        // Label
+        font("bold", opts.labelSize || 11);
+        doc.text(`• ${label}`, labelX, startY, {
           width: labelW,
           align: "left",
-          continued: true,
         });
-        font("normal", opts.valueSize || 10);
-        doc.text(String(value ?? "-"), doc.page.width / 3, doc.y,{
+
+        // Value with ABSOLUTE POSITION
+        font("normal", opts.valueSize || 11);
+        doc.text(String(value ?? "-"), valueX, startY, {
           align: "left",
         });
-        doc.moveDown(0.12);
-      };
 
-      // BOXED ROW helper (draw a rectangular row then put text)
-      const boxedRow = (x, y, w, h) => {
-        doc.rect(x, y, w, h).stroke();
+        // Move cursor manually after row height
+        const rowHeight = opts.rowHeight || 20;
+        doc.y = startY + rowHeight;
+        doc.x = 0;
       };
 
       // Header block: three columns
       const startX = doc.page.margins.left;
-      let curY = doc.y;
-      let headerH = 56;
-      const leftW = pageWidth * 0.15;
-      const centerW = pageWidth * 0.7;
-      const rightW = pageWidth * 0.15;
 
-      // header border
-      doc.save().lineWidth(0.8).rect(startX, curY, pageWidth, headerH).stroke();
-      // left column
-      font("normal", 8);
-      doc.text("ECT-CHEDES", startX + 8, curY + 8, {
-        width: leftW - 16,
-        align: "left",
-      });
-
-      // center column
-      font("normal", 12);
-      doc.text("Enregistremen", startX + leftW, curY + 6, {
-        width: centerW,
-        align: "center",
-      });
-      font("normal", 10);
-      doc.text(
-        "Certificat/rapport de visite d'un Equipement",
-        startX + leftW,
-        curY + 26,
-        {
-          width: centerW,
-          align: "center",
-        }
-      );
-
-      // right column (date & ref)
-      font("normal", 8);
-      const rightX = startX + leftW + centerW;
-      doc.text(
-        `D: ${
-          values.dateOfInspection
-            ? formatFrenchDate(values.dateOfInspection)
-            : ""
-        }`,
-        rightX + 6,
-        curY + 8,
-        {
-          width: rightW - 12,
-          align: "left",
-        }
-      );
-      doc.text(`Ref: ${values.reportRef || ""}`, rightX + 6, curY + 26, {
-        width: rightW - 12,
-        align: "left",
+      doc.table({
+        columnStyles: [100, "*", 100],
+        defaultStyle: { padding: [4, 2, 0, 2], fontSize: 8 },
+        data: [
+          [
+            "ECT-CHEDES",
+            {
+              text: "Enregistremen\nCertificat/rapport de visite d'un Equipement",
+              align: "center",
+            },
+            `D: ${
+              values.dateOfInspection
+                ? formatFrenchDate(values.dateOfInspection)
+                : ""
+            } \nRef: ${values.reportRef || ""}`,
+          ],
+        ],
       });
 
       doc.moveDown(2);
@@ -208,23 +152,25 @@ export async function generateCertificatConformitePDF(values = {}) {
       // Footer three columns: date, inspector, approved
       const footerY = doc.y;
       const colW = pageWidth / 3;
-      font("normal", 10);
+      font("bold", 10);
       doc.text(
         `EL oued, On: ${
-          values.dateOfInspection ? formatDate(values.dateOfInspection) : "-"
+          values.dateOfInspection
+            ? formatFrenchDate(values.dateOfInspection)
+            : "-"
         }`,
-        startX,
+        startX + 30,
         footerY,
         {
           width: colW,
           align: "left",
         }
       );
-      doc.text("Inspector :", startX + colW, footerY, {
+      doc.text("Inspector :", startX + colW + 15, footerY, {
         width: colW,
         align: "center",
       });
-      doc.text("Approved by :", startX + 2 * colW, footerY, {
+      doc.text("Approved by :", startX + 2 * colW - 30, footerY, {
         width: colW,
         align: "right",
       });
@@ -232,342 +178,249 @@ export async function generateCertificatConformitePDF(values = {}) {
       // ----------------- PAGE 2 - REPORT / TABLE DE VISITE -----------------
       doc.addPage();
       // Title for report
-      font("bold", 14);
+      font("bold", 16);
       doc.text("RAPPORT DE VISITE D'UN EQUIPEMENT", {
         align: "center",
+        underline: true,
         width: pageWidth,
       });
-      doc.moveDown(0.3);
       font("normal", 10);
       doc.text("Borthwork Appliance Certificate", {
         align: "center",
         width: pageWidth,
       });
-      doc.moveDown(0.5);
-
-      // Top rows: Owner / Product / Manufacturer / Date of intervention
-      const labelW = pageWidth * 0.4;
-      const valueW = pageWidth - labelW;
-
-      // Owner row
-      font("bold", 9);
-      doc.text("PROPRIETAIRE / Owner:", {
-        width: labelW,
-        align: "right",
-        continued: true,
-      });
-      font("normal", 9);
-      doc.text(values.customer || "-", { width: valueW, align: "left" });
-      doc.moveDown(0.2);
-
-      // Report ref on right of top area
-      font("bold", 9);
-      doc.text("REF RAPPORT / Report Ref:", {
-        width: labelW,
-        align: "right",
-        continued: true,
-      });
-      font("normal", 9);
-      doc.text(values.reportRef || "-", { width: valueW, align: "left" });
-      doc.moveDown(0.2);
-
-      // Product description & date of inspection
-      font("bold", 9);
-      doc.text("PRODUIT / Description:", {
-        width: labelW,
-        align: "right",
-        continued: true,
-      });
-      font("normal", 9);
       doc.text(
-        `${values.description || "-"} — DATE D'INTERVENTION: ${
-          values.dateOfInspection ? formatDate(values.dateOfInspection) : "-"
-        }`,
-        { width: valueW, align: "left" }
-      );
-      doc.moveDown(0.2);
-
-      // Manufacturer
-      font("bold", 9);
-      doc.text("CONSTRUCTEUR / Manufacturer:", {
-        width: labelW,
-        align: "right",
-        continued: true,
-      });
-      font("normal", 9);
-      doc.text(values.manufacturer || "-", { width: valueW, align: "left" });
-      doc.moveDown(0.4);
-
-      // Technical characteristics area
-      const section = (lbl, text) => {
-        font("bold", 9);
-        doc.text(lbl, { width: labelW, align: "right", continued: true });
-        font("normal", 9);
-        doc.text(text || "-", { width: valueW, align: "left" });
-        doc.moveDown(0.15);
-      };
-
-      section("CARACTERISTIQUES TECHNIQUES / Characteristics", "");
-      section("N° DE SERIE / Serial number", values.serialNumber || "-");
-      section("MODEL / Type", values.model || "-");
-      section("ANNEE DE FABRICATION / Year", values.yearOfManufacture || "-");
-
-      doc.moveDown(0.4);
-
-      // Controls table (left column list + 3 small columns ST/NA/VO)
-      const tableX = doc.page.margins.left;
-      let tableY = doc.y;
-      const tableWidth = pageWidth;
-      const leftColW = Math.round(tableWidth * 0.61);
-      const rightColsW = tableWidth - leftColW;
-      const oneColW = Math.round(rightColsW / 3);
-
-      // Draw header rectangle for the table
-      headerH = 22;
-      doc
-        .save()
-        .lineWidth(0.8)
-        .rect(tableX, tableY, tableWidth, headerH)
-        .stroke();
-      font("bold", 9);
-      doc.text(
-        "CONTROLES EFFECTUES / Inspections performed",
-        tableX + 6,
-        tableY + 6,
+        "Décret exécutif '91-05 du19-jane--1991, relatif aux presertations générales de protection applicables en matière",
         {
-          width: leftColW - 12,
           align: "center",
-        }
-      );
-      doc.text("ST", tableX + leftColW, tableY + 6, {
-        width: oneColW,
-        align: "center",
-      });
-      doc.text("NA", tableX + leftColW + oneColW, tableY + 6, {
-        width: oneColW,
-        align: "center",
-      });
-      doc.text("VO", tableX + leftColW + 2 * oneColW, tableY + 6, {
-        width: oneColW,
-        align: "center",
-      });
-
-      tableY += headerH + 6;
-      doc.moveTo(tableX, tableY - 2);
-
-      const checks =
-        Array.isArray(values.checks) && values.checks.length
-          ? values.checks
-          : [
-              "Examen du chassis, traverses, et fixation",
-              "Examen des stabilisateurs, pneumatique et autres (chenilles)",
-              "Examen de l'état des freins des mouvements, et rotations",
-              "Limiteur de vitesse, capacité, et fonctionnement",
-              "Appareils de préhension, et protection contre la chute",
-              "Affichage des consignes et avertisseur sonore",
-            ];
-
-      // Draw each check row: rectangle, left text and empty ST/NA/VO cells
-      const rowH = 22;
-      for (let i = 0; i < checks.length; i++) {
-        // If we are too low on page, add new page and redraw table header
-        if (tableY + rowH > doc.page.height - doc.page.margins.bottom - 120) {
-          doc.addPage();
-          tableY = doc.y;
-          // redraw table header on new page
-          doc
-            .save()
-            .lineWidth(0.8)
-            .rect(tableX, tableY, tableWidth, headerH)
-            .stroke();
-          font("bold", 9);
-          doc.text(
-            "CONTROLES EFFECTUES / Inspections performed",
-            tableX + 6,
-            tableY + 6,
-            { width: leftColW - 12, align: "center" }
-          );
-          doc.text("ST", tableX + leftColW, tableY + 6, {
-            width: oneColW,
-            align: "center",
-          });
-          doc.text("NA", tableX + leftColW + oneColW, tableY + 6, {
-            width: oneColW,
-            align: "center",
-          });
-          doc.text("VO", tableX + leftColW + 2 * oneColW, tableY + 6, {
-            width: oneColW,
-            align: "center",
-          });
-          tableY += headerH + 6;
-        }
-
-        // row box
-        doc.rect(tableX, tableY, tableWidth, rowH).stroke();
-        // left text
-        font("normal", 9);
-        doc.text(checks[i], tableX + 6, tableY + 6, {
-          width: leftColW - 12,
-          align: "left",
-        });
-        // ST/NA/VO markers (empty by default)
-        font("normal", 9);
-        // Optionally pre-fill first row as "X" to indicate sample
-        const fillST = values.preFillFirstRow ? (i === 0 ? "X" : "") : "";
-        doc.text(fillST, tableX + leftColW, tableY + 6, {
-          width: oneColW,
-          align: "center",
-        });
-        doc.text("", tableX + leftColW + oneColW, tableY + 6, {
-          width: oneColW,
-          align: "center",
-        });
-        doc.text("", tableX + leftColW + 2 * oneColW, tableY + 6, {
-          width: oneColW,
-          align: "center",
-        });
-
-        tableY += rowH + 6;
-      }
-
-      // Move doc cursor below table
-      doc.y = tableY + 4;
-
-      doc.moveDown(0.4);
-
-      // Conclusion header
-      font("bold", 10);
-      doc.text("CONCLUSION", { align: "center", width: pageWidth });
-      doc.moveDown(0.3);
-
-      // Conclusion check types
-      const conclusionChecks = [
-        {
-          label: "Controle initial / Initial check",
-          checked: !!values.conclusion?.initial,
-        },
-        {
-          label: "Controle periodique / Periodic check",
-          checked: !!values.conclusion?.periodic,
-        },
-        {
-          label: "Contrôle intermédiaire / intermediate check",
-          checked: !!values.conclusion?.intermediate,
-        },
-        {
-          label: "Contrôle exceptionnel / Exceptional check",
-          checked: !!values.conclusion?.exceptional,
-        },
-      ];
-
-      conclusionChecks.forEach((c) => {
-        font("normal", 9);
-        doc.text(`${c.checked ? "X" : " "}  ${c.label}`, {
-          align: "left",
           width: pageWidth,
+        }
+      );
+
+      doc.moveDown(0.4);
+
+      doc.font("Helvetica-Bold").fontSize(9);
+      doc.table({
+        columnStyles: [230, "*"],
+        data: [
+          [
+            `PROPRIETAIRE/Owner ${values?.customer}`,
+            `REF RAPPORT/Report REF: ${values?.reportRef}`,
+          ],
+          [
+            `PRODUIT /Deseription: ${
+              values?.description
+            } DATE D'INTERVENTION/Date of inspection (${formatFrenchDate(
+              values?.dateOfInspection
+            )})`,
+            `CONTRUCTEUR /Manufacturer ${values?.manufacturer}`,
+          ],
+          [
+            "CARACTERISTIQUES TECHNIQUES /Characteristics",
+            "DERNIER CONTR /last inspection",
+          ],
+          [
+            `N'DE SERIEText /Serial number ${values?.serialNumber}`,
+            "TYPE D'ININTERVENTION:/Periodique/DATE Kid of inspection (initial/(X)Periodic/intermediate)",
+          ],
+          [`MODEL/Type: ${values?.model}`, "EFFECTUE PAR/Fecformed by:"],
+        ],
+      });
+      let imageCell = null;
+      doc.table({
+        columnStyles: [230, "*", 32, 32, 32],
+        defaultStyle: { padding: [3, 2, 0, 2] },
+        rowStyles: (i) => {
+          if (i === 4 && !imageCell) {
+            imageCell = {
+              x: doc.x,
+              y: doc.y,
+              width: 230,
+            };
+          }
+        },
+        data: [
+          [
+            `ANNEE DE FABRICATION: ${values?.yearOfManufacture}\nYear of Manufactured`,
+            {
+              text: "CONTROLES EFFECTUES\nInspections performed",
+              align: "center",
+            },
+            { text: "ST", align: "center" },
+            { text: "NA", align: "center" },
+            { text: "VO", align: "center" },
+          ],
+          [
+            "CAPACITE DE GODET:\nCapacity",
+            "Examen du chassis, traverses, et fixation\nExamination of the frame, cross, and fixed",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "DIAMETRE DU CABLE (EN MM):\nDiameter of cable (mm)",
+            "Examen des stabilisteurs, pneumatique et autres (chenilles)\nExamination of the stabilired tires and others tracked",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "ORGANE DE PREHENSION:\nGripping body",
+            "Contrôle système, niveau des liquides hydrauliques\ncontrol system, the level of hydraulic fluids.",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            {
+              rowSpan: 17,
+              text: "",
+              border: [1, 1, 0, 1],
+            },
+            "Vérifiés les bouchons et fermetures des systèmes hydrauliques\nVerified caps and closures hydraulic systems",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Contrôle des fonctions, et des liminaux (feux, Gyrophare,...)\nControl functions, and liminal (ights, Emergency Light)",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Constitution de la cabine, visibilité, accés, protection toit\nConstitution of the cabin, visibility, access, protection root",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Proprete, stockage carburant, protection incendie\nCleanliness, off storage, and fire protection1",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Protection des organes mobile (fixation), chute d'objet\nMoves bodies protection (Maine), falis of object",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Contrôle toutes les parties habituellement graissées\nContorl all parties usually greased",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Examen de l'état des freins des mouvements, et rotations\nExamination of the state of the brakes of the movements.",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Limiteur de vitesse, capacité, et fonctionnement\nSpeed limited, capacity, and operation",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Appareils de prehhension, et protection contre la chute",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Affichage des consignes et avertisseur sonore",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [
+            "Acces pour visite registre, et verification periodique",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          [{ colSpan: 4, text: "CONCLUSION", align: "center" }],
+          ["Controle initail/ Initial check", "", "", ""],
+          [
+            "Controle periodique/Periodic check",
+            { text: "X", align: "center" },
+            "",
+            "",
+          ],
+          ["Contrôle intermédiaire/intermediate check", "", "", ""],
+          ["Contrôle exceptionnel/Exceptional check", "", "", ""],
+        ],
+      });
+
+      doc.table({
+        columnStyles: [230, "*", "*", "*"],
+        data: [
+          [
+            { text: "", border: [0, 1, 1, 1] },
+            "* ST: SATISFAISANT\nSatisfactory",
+            "NA: NON APPLICABLE\nNot applicable",
+            "VO: VOIR OBSERVATION\nSee remark",
+          ],
+          [
+            {
+              colSpan: 4,
+              text: "COMMENTAIRES/Comment: CET APPAREL EST BON ETAT, DOIT EIRE MAINTENIR EN SERVICES",
+              padding: 5,
+            },
+          ],
+          [
+            {
+              colSpan: 4,
+              text: "OBSERVATIONS/Remarks: R.A.S",
+              padding: 5,
+            },
+          ],
+        ],
+      });
+
+      doc.table({
+        columnStyles: ["*", "*", "*"],
+        defaultStyle: { padding: [4, 2, 0, 2] },
+        data: [
+          [
+            {
+              rowSpan: 2,
+              text: `PROCHAIN CONTROLE/Next inspection\nPERIODIQUE: ${formatShortFrenchDate(
+                addOneYear(values?.dateOfInspection)
+              )}\nPeriodic\nNTERMEDIAIRE: -10 jours/${formatShortFrenchDate(
+                addOneYear(values?.dateOfInspection)
+              )}/+10 jours\nIntermediate`,
+            },
+            {
+              text: `ETABLI A/Issued at: EL OUED\nCONTROLE EFFECTUE'PAR/performed by:\n${values?.manager}\n`,
+            },
+            {
+              rowSpan: 2,
+              text: `Le, On:  ${formatFrenchDate(values?.dateOfInspection)}`,
+            },
+          ],
+          [
+            "VISA ET CACHET-Signature and stampAccording to the algerian regulations (Please see above)\n",
+          ],
+        ],
+      });
+      if (values.equipmentImage){
+      const ROW_COUNT = 17;
+      const ROW_HEIGHT = 12;
+      const imageHeight = ROW_COUNT * ROW_HEIGHT;
+      if (imageCell) {
+        const imgWidth = 220; // auto scale
+        const imgHeight = 120;
+
+        const imgX = imageCell.x + (imageCell.width - imgWidth) / 2;
+        const imgY = imageCell.y + (imageHeight - imgHeight) / 2 + 20;
+        doc.image(values.equipmentImage, imgX, imgY, {
+          width: imgWidth,
         });
-        doc.moveDown(0.1);
-      });
-
-      doc.moveDown(0.4);
-
-      // Legend: ST / NA / VO
-      font("normal", 8);
-      doc.text("*ST: SATISFAISANT / Satisfactory", {
-        continued: true,
-        width: leftColW,
-        align: "left",
-      });
-      doc.text("NA: NON APPLICABLE / Not applicable", {
-        continued: true,
-        width: oneColW,
-        align: "left",
-      });
-      doc.text("VO: VOIR OBSERVATION / See remark", {
-        width: oneColW,
-        align: "left",
-      });
-
-      doc.moveDown(0.6);
-
-      // Comments and Observations
-      font("bold", 9);
-      doc.text("COMMENTAIRES / Comment:", { align: "left", width: pageWidth });
-      font("normal", 9);
-      doc.text(values.comments || values.notes || "—", {
-        align: "left",
-        width: pageWidth,
-      });
-      doc.moveDown(0.4);
-      font("bold", 9);
-      doc.text("OBSERVATIONS / Remarks:", { align: "left", width: pageWidth });
-      font("normal", 9);
-      doc.text(values.observations || "-", { align: "left", width: pageWidth });
-
-      doc.moveDown(0.6);
-
-      // Next inspection and signature columns
-      const footerBlockY = doc.y;
-      const blockW = pageWidth / 3;
-      font("normal", 9);
-      doc.text(
-        `PROCHAIN CONTROLE/Next inspection: ${
-          values.nextInspection || formatDate(values.dateOfInspection)
-        }`,
-        tableX,
-        footerBlockY,
-        {
-          width: blockW,
-          align: "left",
-        }
-      );
-      doc.text(`ETABLI A/Issued at: EL OUED`, tableX + blockW, footerBlockY, {
-        width: blockW,
-        align: "left",
-      });
-      doc.text(
-        `Le, On: ${
-          values.dateOfInspection ? formatDate(values.dateOfInspection) : "-"
-        }`,
-        tableX + 2 * blockW,
-        footerBlockY,
-        {
-          width: blockW,
-          align: "left",
-        }
-      );
-
-      doc.moveDown(1);
-
-      doc.text(
-        `CONTROLE EFFECTUE PAR / performed by: ${values.manager || "-"}`,
-        { align: "left", width: pageWidth }
-      );
-      doc.moveDown(0.6);
-      doc.text("VISA ET CACHET - Signature and stamp", {
-        align: "left",
-        width: pageWidth,
-      });
-
-      // Render equipment image if provided as data URL
-      if (
-        values.equipmentImage &&
-        typeof values.equipmentImage === "string" &&
-        values.equipmentImage.startsWith("data:")
-      ) {
-        try {
-          const base64 = values.equipmentImage.split(",")[1];
-          const img = Buffer.from(base64, "base64");
-          // place image on the left under signature area if space, else top-right of current page
-          const imgX = doc.page.margins.left;
-          const imgY = doc.y + 8;
-          const maxW = 140;
-          const maxH = 100;
-          doc.image(img, imgX, imgY, { width: maxW, height: maxH });
-        } catch (err) {
-          // ignore image errors
-        }
-      }
+      }}
 
       // Finalize PDF
       doc.end();

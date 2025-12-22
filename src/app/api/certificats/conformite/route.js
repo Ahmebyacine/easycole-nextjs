@@ -12,36 +12,19 @@ export async function POST(req) {
         status: 401,
       });
     }
-    const { reportRef } = await req.json();
+    const body = await req.json();
     // validate body lightly
-    //if (!body) {
-    //  return NextResponse.json({ message: "Missing body" }, { status: 400 });
-    //}
+    if (!body) {
+      return NextResponse.json({ message: "Missing body" }, { status: 400 });
+    }
 
-    console.log(reportRef);
-    const data = {
-      reportRef: "REF-001",
-      dateOfInspection: "2025-11-21",
-      description: "Excavator Model X",
-      customer: "ACME Corp",
-      manufacturer: "ACME Industries",
-      model: "X-1000",
-      workingLoadLimit: "2000 kg",
-      yearOfManufacture: "2020",
-      serialNumber: "SN-123456",
-      equipmentImage: "data:image/png;base64,...", // optional data URL
-      manager: "Inspector Name",
-      notes: "...",
-      checks: ["Check 1", "Check 2"], // optional array for table rows
-    };
-
-    const pdfBuffer = await generateCertificatConformitePDF(data);
+    const pdfBuffer = await generateCertificatConformitePDF(body);
 
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `inline; filename=certificat-${
-          reportRef || "report"
+          body.reportRef || "report"
         }.pdf`,
       },
     });

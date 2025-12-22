@@ -27,7 +27,6 @@ export default function EmployeeStatistics() {
 
   if (loading)
     return <p className="text-center mt-6">جاري تحميل البيانات...</p>;
-  console.log(data)
   return (
     <div className="space-y-6" dir="rtl">
       <div className="flex justify-between items-center">

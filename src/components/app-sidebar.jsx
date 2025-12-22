@@ -78,20 +78,28 @@ const navItemsByRole = {
     { title: "قيد التسجيل", url: "/employee/whitelist", icon: LoaderIcon },
     { title: "متدربون محتملون", url: "/employee/lead", icon: Contact },
     {
-    title: "إحصائيات البرامج",
-    url: "/employee/statistics/programs",
-    icon: Calendar,
-  },
+      title: "إحصائيات البرامج",
+      url: "/employee/statistics/programs",
+      icon: Calendar,
+    },
     { title: "إحصائيات", url: "/employee/statistics", icon: ChartBarStacked },
   ],
   member: [
-    //{ title: "شهادة مطابقة", url: "/member/certificats/conformite", icon: BookCheck },
+    {
+      title: "شهادة مطابقة",
+      url: "/member/certificats/conformite",
+      icon: BookCheck,
+    },
     {
       title: "شهادة التدريب",
       url: "/member/certificats/formation",
       icon: GraduationCap,
     },
-    { title: "شهادة الكفاءة", url: "/member/certificats/aptitude", icon: FileClock },
+    {
+      title: "شهادة الكفاءة",
+      url: "/member/certificats/aptitude",
+      icon: FileClock,
+    },
     {
       title: "شهادة التدريب (سنة واحدة)",
       url: "/member/certificats/formation-duree",

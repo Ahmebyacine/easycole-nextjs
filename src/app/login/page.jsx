@@ -62,7 +62,7 @@ export default function SignIn() {
       const rolePaths = {
         admin: "/admin/dashboard",
         manager: "/manager/programs",
-        member: "/member/certificats/formation",
+        member: "/member/certificats/conformite",
         employee: "/employee/add-trainee",
       };
 
