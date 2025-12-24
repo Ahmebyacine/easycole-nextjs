@@ -83,7 +83,7 @@ export default function ConfirmTraineeModal({
   const discount = form.watch("discount");
 
   useEffect(() => {
-    const selectedProgram = programs.find((p) => p._id === programId);
+    const selectedProgram = programs?.find((p) => p._id === programId);
 
     if (selectedProgram) {
       const basePrice = selectedProgram.course.price;
