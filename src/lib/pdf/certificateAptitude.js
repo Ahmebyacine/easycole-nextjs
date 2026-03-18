@@ -126,7 +126,7 @@ Il est attribué à Mr/Ms : `,
         doc.fillColor("#1E4F79").text(trainee.fullName);
 
         doc.fillColor("black").text("Né le : ", { continued: true });
-        doc.fillColor("#1E4F79").text(formatFrenchDate(trainee.birthDate), {
+        doc.fillColor("#1E4F79").text(trainee.birthDate, {
           continued: true,
         });
 
