@@ -7,3 +7,4 @@ import Program from "@/models/Program";
 import Trainee from "@/models/Trainee";
 import Trainer from "@/models/Trainer";
 import Whitelist from "@/models/Whitelist";
+import Attendance from "@/models/Attendance";

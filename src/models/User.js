@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["employee", "manager", "member", "admin"],
       default: "employee",
     },
+    attendanceId: { type: String, unique: true, sparse: true },
   },
   { timestamps: true }
 );

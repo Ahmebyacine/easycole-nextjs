@@ -64,3 +64,35 @@ export const calculateDuration = (startDate, endDate) => {
     return `${arabicNumber} يومًا`;
   }
 };
+
+export function timeToMinutes(value) {
+  const normalized = normalizeTime(value);
+  if (!normalized) return null;
+  const parts = normalized.split(":");
+  const hh = parseInt(parts[0], 10);
+  const mm = parseInt(parts[1], 10);
+  if (Number.isNaN(hh) || Number.isNaN(mm)) return null;
+  return hh * 60 + mm;
+}
+
+export function formatTime(value) {
+  const normalized = normalizeTime(value);
+  return normalized || "";
+}
+
+function normalizeTime(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (!Number.isNaN(d.getTime())) {
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${hh}:${mm}`;
+  }
+  const timeMatch = `${value}`.match(/^(\d{1,2}):(\d{2})$/);
+  if (timeMatch) {
+    const hh = String(parseInt(timeMatch[1], 10)).padStart(2, "0");
+    const mm = String(parseInt(timeMatch[2], 10)).padStart(2, "0");
+    return `${hh}:${mm}`;
+  }
+  return null;
+}

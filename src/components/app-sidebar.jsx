@@ -51,6 +51,7 @@ import {
 const navItemsByRole = {
   admin: [
     { title: "لوحة التحكم", url: "/admin/dashboard", icon: LayoutDashboard },
+    { title: "الحضور", url: "/dashboard/attendance", icon: FileClock },
     { title: "البرامج", url: "/admin/programs", icon: Calendar },
     { title: "الدورات", url: "/admin/courses", icon: BookOpen },
     { title: "المؤسسات", url: "/admin/institutions", icon: Building2 },
@@ -58,6 +59,7 @@ const navItemsByRole = {
     { title: "المدربين", url: "/admin/trainers", icon: Contact },
   ],
   manager: [
+    { title: "الحضور", url: "/dashboard/attendance", icon: FileClock },
     { title: "البرامج", url: "/manager/programs", icon: Calendar },
     { title: "الدورات", url: "/manager/courses", icon: BookOpen },
     { title: "المؤسسات", url: "/manager/institutions", icon: Building2 },
@@ -129,6 +131,7 @@ const navItemsAdminStatistics = [
     href: "/admin/statistics/employees",
     icon: Users,
   },
+    { title: "الحضور", href: "/admin/attendance", icon: FileClock },
 ];
 
 export function AppSidebar() {

@@ -42,6 +42,7 @@ const userSchema = z.object({
   nationalId: z.string().min(1, "الرقم الوطني مطلوب"),
   role: z.enum(["employee", "manager", "member"]),
   institutions: z.array(z.string()).optional(),
+  attendanceId: z.string().optional(),
 });
 
 export default function UserModal({
@@ -59,15 +60,24 @@ export default function UserModal({
       nationalId: "",
       role: "employee",
       institutions: [],
+      attendanceId: "",
     },
   });
 
+  console.log(editingUser);
   useEffect(() => {
     if (editingUser) {
       form.reset({
-        ...editingUser,
+        name: editingUser.name || "",
+        email: editingUser.email || "",
         password: "",
-        institutions: editingUser.institutions.map((inst) => inst._id),
+        phone: editingUser.phone || "",
+        nationalId: editingUser.nationalId || "",
+        role: editingUser.role || "employee",
+        attendanceId: editingUser.attendanceId || "",
+        institutions: editingUser.institutions
+          ? editingUser.institutions.map((inst) => inst._id)
+          : [],
       });
     } else {
       form.reset({
@@ -78,11 +88,13 @@ export default function UserModal({
         nationalId: "",
         role: "employee",
         institutions: [],
+        attendanceId: "",
       });
     }
   }, [editingUser, form]);
 
   const handleSubmit = (data) => {
+    console.log(data);
     const payload = editingUser ? { ...editingUser, ...data } : data;
     onSubmit(payload);
     form.reset();
@@ -200,6 +212,19 @@ export default function UserModal({
             />
             <FormField
               control={form.control}
+              name="attendanceId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>معرف الحضور</FormLabel>
+                  <FormControl>
+                    <Input placeholder="معرف الحضور" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="role"
               render={({ field }) => (
                 <FormItem>
@@ -244,10 +269,10 @@ export default function UserModal({
                                 checked={field.value.includes(institution._id)}
                                 onChange={() => {
                                   const newValue = field.value.includes(
-                                    institution._id
+                                    institution._id,
                                   )
                                     ? field.value.filter(
-                                        (id) => id !== institution._id
+                                        (id) => id !== institution._id,
                                       )
                                     : [...field.value, institution._id];
                                   field.onChange(newValue);
@@ -270,6 +295,7 @@ export default function UserModal({
                 </FormItem>
               )}
             />
+
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline">إلغاء</Button>
