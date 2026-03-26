@@ -1,4 +1,4 @@
-import PDFDocument, { y } from "pdfkit";
+import PDFDocument from "pdfkit";
 import path from "path";
 
 const fontsPath = path.join(process.cwd(), "src/assets/fonts");
@@ -53,22 +53,21 @@ export function generateAttendanceReportPDF({
     defaultStyle: { align: "center" },
   });
 
+
   doc.table({
     ...tableOptions("CairoBold"),
-    data: [["عدد الساعات", "الخروج", "الدخول", "التاريخ"]],
+    data: [["الساعات عدد ", "الخروج", "الدخول", "التاريخ"]],
   });
 
   rows.forEach((r) => {
     doc.table({
       ...tableOptions("Cairo"),
-      data: [
-        [r.workedHours.toFixed(2), r.checkOut || "-", r.checkIn || "-", r.date],
-      ],
+      data: [[r.workedHours, r.checkOut || "-", r.checkIn || "-", r.date]],
     });
   });
 
   doc.moveDown(1);
-  row("إجمالي ساعات العمل", `${totalHours.toFixed(2)}`);
+  row("إجمالي ساعات العمل", `${totalHours || "00:00"}`);
 
   doc.end();
 

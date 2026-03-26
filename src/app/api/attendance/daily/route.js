@@ -6,7 +6,6 @@ import Attendance from "@/models/Attendance";
 import User from "@/models/User";
 import "@/lib/models";
 
-
 export async function GET(request) {
   try {
     await connectDB();
@@ -33,7 +32,9 @@ export async function GET(request) {
       { attendanceId: { $in: userIds } },
       { attendanceId: 1, name: 1 },
     ).lean();
-    const userMap = Object.fromEntries(users.map((u) => [u.attendanceId, u.name]));
+    const userMap = Object.fromEntries(
+      users.map((u) => [u.attendanceId, u.name]),
+    );
     const grouped = {};
 
     for (const record of records) {
@@ -63,7 +64,12 @@ export async function GET(request) {
       if (entry.checkIn && entry.checkOut) {
         const inTime = new Date(`${date}T${entry.checkIn}`);
         const outTime = new Date(`${date}T${entry.checkOut}`);
-        workedHours = Math.max(0, (outTime - inTime) / (1000 * 60 * 60));
+        const totalMinutes = Math.max(0, (outTime - inTime) / (1000 * 60));
+
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = Math.floor(totalMinutes % 60);
+
+        workedHours = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
       }
 
       return {

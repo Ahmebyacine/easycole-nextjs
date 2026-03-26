@@ -6,12 +6,18 @@ import Attendance from "@/models/Attendance";
 import User from "@/models/User";
 import "@/lib/models";
 
-const calcWorkedHours = (checkIn, checkOut, date) => {
+const calcWorkedMinutes = (checkIn, checkOut, date) => {
   if (!checkIn || !checkOut) return 0;
+
   const inTime = new Date(`${date}T${checkIn}`);
   const outTime = new Date(`${date}T${checkOut}`);
-  const hours = Math.max(0, (outTime - inTime) / (1000 * 60 * 60));
-  return Number(hours.toFixed(2));
+  return Math.max(0, Math.floor((outTime - inTime) / (1000 * 60)));
+};
+
+const minutesToTime = (totalMinutes) => {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 };
 
 export async function GET(request) {
@@ -35,13 +41,17 @@ export async function GET(request) {
     }
 
     const monthReg = new RegExp(`^${month}-\\d{2}$`);
-    const records = await Attendance.find({ date: { $regex: monthReg } }).lean();
+    const records = await Attendance.find({
+      date: { $regex: monthReg },
+    }).lean();
     const userIds = [...new Set(records.map((r) => r.userId))];
     const users = await User.find(
       { attendanceId: { $in: userIds } },
       { attendanceId: 1, name: 1 },
     ).lean();
-    const userMap = Object.fromEntries(users.map((u) => [u.attendanceId, u.name]));
+    const userMap = Object.fromEntries(
+      users.map((u) => [u.attendanceId, u.name]),
+    );
 
     // Group by userId → date → { checkIn, checkOut }
     const groupedByUser = {};
@@ -57,7 +67,6 @@ export async function GET(request) {
       };
 
       if (status === "0") {
-        // Keep earliest check-in
         if (
           !groupedByUser[userId][date].checkIn ||
           timestamp < groupedByUser[userId][date].checkIn
@@ -65,7 +74,6 @@ export async function GET(request) {
           groupedByUser[userId][date].checkIn = timestamp;
         }
       } else if (status === "1") {
-        // Keep latest check-out
         if (
           !groupedByUser[userId][date].checkOut ||
           timestamp > groupedByUser[userId][date].checkOut
@@ -78,13 +86,13 @@ export async function GET(request) {
     // Aggregate totals per user
     const result = Object.entries(groupedByUser).map(([userId, dates]) => {
       let totalDaysWorked = 0;
-      let totalHoursWorked = 0;
+      let totalMinutesWorked = 0;
 
       Object.values(dates).forEach(({ checkIn, checkOut, date }) => {
-        const hours = calcWorkedHours(checkIn, checkOut, date);
-        if (hours > 0) {
+        const minutes = calcWorkedMinutes(checkIn, checkOut, date);
+        if (minutes > 0) {
           totalDaysWorked += 1;
-          totalHoursWorked += hours;
+          totalMinutesWorked += minutes;
         }
       });
 
@@ -92,7 +100,7 @@ export async function GET(request) {
         userId,
         name: userMap[userId] || userId,
         totalDaysWorked,
-        totalHoursWorked: Number(totalHoursWorked.toFixed(2)),
+        totalHoursWorked: minutesToTime(totalMinutesWorked),
       };
     });
 

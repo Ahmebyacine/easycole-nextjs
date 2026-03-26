@@ -59,7 +59,7 @@ function DailyAttendanceTable({ date }) {
               <TableCell>{row?.name || row.userId}</TableCell>
               <TableCell>{row.checkIn || "-"}</TableCell>
               <TableCell>{row.checkOut || "-"}</TableCell>
-              <TableCell>{row.workedHours.toFixed(2)}</TableCell>
+              <TableCell>{row.workedHours || "00:00"}</TableCell>
             </TableRow>
           ))
         ) : (
@@ -117,7 +117,7 @@ function MonthlyAttendanceTable({ month }) {
               <TableRow key={row.userId}>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.totalDaysWorked || 0}</TableCell>
-                <TableCell>{(row.totalHoursWorked || 0).toFixed(2)}</TableCell>
+                <TableCell>{row.totalHoursWorked || "00:00"}</TableCell>
                 <TableCell>
                   <Button size="sm" onClick={() => downloadReport(row.userId)}>
                     تحميل التقرير
