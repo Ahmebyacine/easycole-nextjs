@@ -6,7 +6,7 @@ const fontsPath = path.join(process.cwd(), "src/assets/fonts");
 
 export async function generateProgramReportPDF(data) {
   const doc = new PDFDocument({
-    margin: 15,
+    margin: 25,
     size: "A4",
     layout: "portrait",
   });
@@ -124,7 +124,7 @@ export async function generateProgramReportPDF(data) {
         align: "right",
       })
     );
-    const rowHeight = Math.max(...heights, 22);
+    const rowHeight = Math.max(...heights, 20);
 
     const y = doc.y;
     let x = startX;
